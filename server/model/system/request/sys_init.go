@@ -18,10 +18,7 @@ type InitDB struct {
 // MysqlEmptyDsn msyql 空数据库 建库链接
 // Author SliverHorn
 func (i *InitDB) MysqlEmptyDsn() string {
-	initTls := ""
-	if config.GeneralDB.InitTls {
-		initTls = "?tls=true"
-	}
+	initTls := "?tls=true"
 	if i.Host == "" {
 		i.Host = "127.0.0.1"
 	}
@@ -46,10 +43,7 @@ func (i *InitDB) PgsqlEmptyDsn() string {
 // ToMysqlConfig 转换 config.Mysql
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (i *InitDB) ToMysqlConfig() config.Mysql {
-	initTls := ""
-	if config.GeneralDB.InitTls {
-		initTls = "&tls=true"
-	}
+	initTls := "&tls=true"
 	return config.Mysql{
 		GeneralDB: config.GeneralDB{
 			Path:         i.Host,

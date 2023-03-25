@@ -75,6 +75,7 @@ func Routers() *gin.Engine {
 		greenRouter := router.RouterGroupApp.Green
 		greenRouter.InitTypeRouter(PrivateGroup)
 		greenRouter.InitGardenRouter(PrivateGroup)
+		greenRouter.InitProductionRouter(PrivateGroup)
 	}
 
 	global.GVA_LOG.Info("router register success")

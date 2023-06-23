@@ -31,7 +31,7 @@
         <div class="header-img-box-list">
           <el-image
             :key="key"
-            :src="(item.url && item.url.slice(0, 4) !== 'http')?path+item.url:item.url"
+            :src="getUrl(item.url)"
             @click="chooseImg(item.url,target,targetKey)"
           >
             <template #error>
@@ -59,6 +59,7 @@
 </template>
 
 <script setup>
+import { getUrl } from '@/utils/image'
 import { ref } from 'vue'
 import { getFileList, editFileName } from '@/api/fileUploadAndDownload'
 import UploadImage from '@/components/upload/image.vue'
@@ -99,7 +100,6 @@ defineProps({
 
 const drawer = ref(false)
 const picList = ref([])
-const path = ref(import.meta.env.VITE_BASE_API + '/')
 
 const chooseImg = (url, target, targetKey) => {
   if (target && targetKey) {

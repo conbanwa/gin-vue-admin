@@ -1,6 +1,7 @@
 package system
 
 import (
+	"archive/zip"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -123,11 +124,11 @@ type AutoCodeService struct{}
 
 var AutoCodeServiceApp = new(AutoCodeService)
 
-//@author: [songzhibin97](https://github.com/songzhibin97)
-//@function: PreviewTemp
-//@description: 预览创建代码
-//@param: model.AutoCodeStruct
-//@return: map[string]string, error
+// @author: [songzhibin97](https://github.com/songzhibin97)
+// @function: PreviewTemp
+// @description: 预览创建代码
+// @param: model.AutoCodeStruct
+// @return: map[string]string, error
 
 func (autoCodeService *AutoCodeService) PreviewTemp(autoCode system.AutoCodeStruct) (map[string]string, error) {
 	makeDictTypes(&autoCode)
@@ -140,6 +141,12 @@ func (autoCodeService *AutoCodeService) PreviewTemp(autoCode system.AutoCodeStru
 		}
 		if autoCode.Fields[i].Sort {
 			autoCode.NeedSort = true
+		}
+		if autoCode.Fields[i].FieldType == "picture" {
+			autoCode.HasPic = true
+		}
+		if autoCode.Fields[i].FieldType == "file" {
+			autoCode.HasFile = true
 		}
 	}
 	dataList, _, needMkdir, err := autoCodeService.getNeedList(&autoCode)
@@ -213,11 +220,11 @@ func makeDictTypes(autoCode *system.AutoCodeStruct) {
 	}
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: CreateTemp
-//@description: 创建代码
-//@param: model.AutoCodeStruct
-//@return: err error
+// @author: [piexlmax](https://github.com/piexlmax)
+// @function: CreateTemp
+// @description: 创建代码
+// @param: model.AutoCodeStruct
+// @return: err error
 
 func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruct, ids ...uint) (err error) {
 	makeDictTypes(&autoCode)
@@ -230,6 +237,12 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 		}
 		if autoCode.Fields[i].Sort {
 			autoCode.NeedSort = true
+		}
+		if autoCode.Fields[i].FieldType == "picture" {
+			autoCode.HasPic = true
+		}
+		if autoCode.Fields[i].FieldType == "file" {
+			autoCode.HasFile = true
 		}
 	}
 	// 增加判断: 重复创建struct
@@ -291,6 +304,7 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 			// 在gorm.go 注入 自动迁移
 			path := filepath.Join(global.GVA_CONFIG.AutoCode.Root,
 				global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SInitialize, "gorm.go")
+			autoCode.BusinessDB = utils.MaheHump(autoCode.BusinessDB) // 这里将 数据库中间存在 - 的转换为驼峰
 			ast2.AddRegisterTablesAst(path, "RegisterTables", autoCode.Package, autoCode.BusinessDB, autoCode.StructName)
 		}
 
@@ -300,7 +314,7 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 				global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SInitialize, "router.go")
 			ast2.AddRouterCode(path, "Routers", autoCode.Package, autoCode.StructName)
 		}
-		//给各个enter进行注入
+		// 给各个enter进行注入
 		err = injectionCode(autoCode.StructName, &injectionCodeMeta)
 		if err != nil {
 			return
@@ -351,11 +365,11 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 	return nil
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: GetAllTplFile
-//@description: 获取 pathName 文件夹下所有 tpl 文件
-//@param: pathName string, fileList []string
-//@return: []string, error
+// @author: [piexlmax](https://github.com/piexlmax)
+// @function: GetAllTplFile
+// @description: 获取 pathName 文件夹下所有 tpl 文件
+// @param: pathName string, fileList []string
+// @return: []string, error
 
 func (autoCodeService *AutoCodeService) GetAllTplFile(pathName string, fileList []string) ([]string, error) {
 	files, err := os.ReadDir(pathName)
@@ -374,11 +388,11 @@ func (autoCodeService *AutoCodeService) GetAllTplFile(pathName string, fileList 
 	return fileList, err
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@function: GetDB
-//@description: 获取指定数据库和指定数据表的所有字段名,类型值等
-//@param: tableName string, dbName string
-//@return: err error, Columns []request.ColumnReq
+// @author: [piexlmax](https://github.com/piexlmax)
+// @function: GetDB
+// @description: 获取指定数据库和指定数据表的所有字段名,类型值等
+// @param: tableName string, dbName string
+// @return: err error, Columns []request.ColumnReq
 
 func (autoCodeService *AutoCodeService) DropTable(BusinessDb, tableName string) error {
 	if BusinessDb != "" {
@@ -388,12 +402,12 @@ func (autoCodeService *AutoCodeService) DropTable(BusinessDb, tableName string) 
 	}
 }
 
-//@author: [SliverHorn](https://github.com/SliverHorn)
-//@author: [songzhibin97](https://github.com/songzhibin97)
-//@function: addAutoMoveFile
-//@description: 生成对应的迁移文件路径
-//@param: *tplData
-//@return: null
+// @author: [SliverHorn](https://github.com/SliverHorn)
+// @author: [songzhibin97](https://github.com/songzhibin97)
+// @function: addAutoMoveFile
+// @description: 生成对应的迁移文件路径
+// @param: *tplData
+// @return: null
 
 func (autoCodeService *AutoCodeService) addAutoMoveFile(data *tplData) {
 	base := filepath.Base(data.autoCodePath)
@@ -433,12 +447,12 @@ func (autoCodeService *AutoCodeService) addAutoMoveFile(data *tplData) {
 	}
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@author: [SliverHorn](https://github.com/SliverHorn)
-//@function: CreateApi
-//@description: 自动创建api数据,
-//@param: a *model.AutoCodeStruct
-//@return: err error
+// @author: [piexlmax](https://github.com/piexlmax)
+// @author: [SliverHorn](https://github.com/SliverHorn)
+// @function: CreateApi
+// @description: 自动创建api数据,
+// @param: a *model.AutoCodeStruct
+// @return: err error
 
 func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) (ids []uint, err error) {
 	apiList := []system.SysApi{
@@ -766,4 +780,127 @@ func skipMacSpecialDocument(src string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func (autoCodeService *AutoCodeService) PubPlug(plugName string) (zipPath string, err error) {
+	if plugName == "" {
+		return "", errors.New("插件名称不能为空")
+	}
+
+	// 防止路径穿越
+	plugName = filepath.Clean(plugName)
+
+	webPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Web, "plugin", plugName)
+	serverPath := filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, "plugin", plugName)
+	// 创建一个新的zip文件
+
+	// 判断目录是否存在
+	_, err = os.Stat(webPath)
+	if err != nil {
+		return "", errors.New("web路径不存在")
+	}
+	_, err = os.Stat(serverPath)
+	if err != nil {
+		return "", errors.New("server路径不存在")
+	}
+
+	fileName := plugName + ".zip"
+	// 创建一个新的zip文件
+	zipFile, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer zipFile.Close()
+
+	// 创建一个zip写入器
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// 遍历webPath目录并将所有非隐藏文件添加到zip归档中
+	err = filepath.Walk(webPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 跳过隐藏文件和目录
+		if strings.HasPrefix(info.Name(), ".") || info.IsDir() {
+			return nil
+		}
+
+		// 创建一个新的文件头
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+
+		// 将文件头的名称设置为文件的相对路径
+		rel, _ := filepath.Rel(webPath, path)
+		header.Name = filepath.Join(plugName, "web", "plugin", plugName, rel)
+
+		// 将文件添加到zip归档中
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		// 打开文件并将其内容复制到zip归档中
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = io.Copy(writer, file)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return
+	}
+
+	// 遍历serverPath目录并将所有非隐藏文件添加到zip归档中
+	err = filepath.Walk(serverPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 跳过隐藏文件和目录
+		if strings.HasPrefix(info.Name(), ".") || info.IsDir() {
+			return nil
+		}
+
+		// 创建一个新的文件头
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+
+		// 将文件头的名称设置为文件的相对路径
+		rel, _ := filepath.Rel(serverPath, path)
+		header.Name = filepath.Join(plugName, "server", "plugin", plugName, rel)
+		// 将文件添加到zip归档中
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		// 打开文件并将其内容复制到zip归档中
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = io.Copy(writer, file)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return
+	}
+	return filepath.Join(global.GVA_CONFIG.AutoCode.Root, global.GVA_CONFIG.AutoCode.Server, fileName), nil
 }

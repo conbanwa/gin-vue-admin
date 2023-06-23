@@ -7,7 +7,7 @@ aliyun-oss:
   base-path: yourBasePath
 autocode:
   transfer-restart: true
-  root: C:\Users\j6j7\Documents\GitHub\conbanwa\gin-vue-admin
+  root: C:\github\gin-vue-admin
   server: /server
   server-api: /api/v1/%s
   server-plug: /plugin/%s
@@ -31,44 +31,44 @@ aws-s3:
   base-url: https://gin.vue.admin
   path-prefix: github.com/flipped-aurora/gin-vue-admin/server
 captcha:
-  key-long: 6
+  key-long: 4
   img-width: 240
   img-height: 80
   open-captcha: 10
   open-captcha-timeout: 3600
+# 跨域配置
+# 需要配合 server/initialize/router.go -> `Router.Use(middleware.CorsByRules())` 使用
 cors:
-  mode: strict-whitelist
+  mode: strict-whitelist # 放行模式: allow-all, 放行全部; whitelist, 白名单模式, 来自白名单内域名的请求添加 cors 头; strict-whitelist 严格白名单模式, 白名单外的请求一律拒绝
   whitelist:
   - allow-origin: example1.com
-    allow-methods: POST, GET
     allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id
-    expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,
-      Content-Type
-    allow-credentials: true
+    allow-methods: POST, GET
+    expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
+
+    allow-credentials: true # 布尔值
   - allow-origin: example2.com
-    allow-methods: GET, POST
     allow-headers: content-type
-    expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,
-      Content-Type
-    allow-credentials: true
+    allow-methods: GET, POST
+    expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
+    allow-credentials: true # 布尔值
+
+# zap logger configuration
 db-list:
-- disable: true
-  type: ""
-  alias-name: ""
+- disable: true # 是否禁用
+  type: "" # 数据库的类型,目前支持mysql、pgsql、mssql、oracle
+  alias-name: "" # 数据库的名称,注意: alias-name 需要在db-list中唯一
   path: ""
   port: ""
   config: ""
   db-name: ""
   username: ""
   password: ""
-  prefix: ""
-  singular: false
-  engine: ""
   max-idle-conns: 10
   max-open-conns: 100
   log-mode: ""
   log-zap: false
-  init-tls: false
+# qiniu configuration (请自行七牛申请对应的 公钥 私钥 bucket 和 域名地址)
 email:
   to: xxx@qq.com
   port: 465
@@ -86,7 +86,7 @@ hua-wei-obs:
   access-key: you-access-key
   secret-key: you-secret-key
 jwt:
-  signing-key: 1bc4a347-1f5a-45a2-b52e-ea4d8e8e1fb0
+  signing-key: qmPlus
   expires-time: 7d
   buffer-time: 1d
   issuer: qmPlus
@@ -100,27 +100,25 @@ mssql:
   db-name: ""
   username: ""
   password: ""
-  prefix: ""
-  singular: false
-  engine: ""
   max-idle-conns: 10
   max-open-conns: 100
   log-mode: ""
   log-zap: false
   init-tls: false
 mysql:
-  path: ap-northeast.connect.psdb.cloud
+  database: gva
   port: "3306"
   config: charset=utf8mb4&parseTime=True&loc=Local&tls=true
   db-name: gva
-  username: pbi4csiczhddtrt3baa6
-  password: pscale_pw_5d4wMwOs6b67T4rTFv5RnzzkMBGrmeidBPGNQMXAAay
+  username: 738zjcjgm283c34ptxy1
+  path: aws.connect.psdb.cloud
+  password: pscale_pw_sY2pMA16a68yagc4W3pIrzJrePDwBRNzFAy10D6kMSg
   prefix: ""
   singular: false
   engine: ""
   max-idle-conns: 10
   max-open-conns: 100
-  log-mode: error
+  log-mode: ""
   log-zap: false
   init-tls: false
 oracle:
@@ -130,29 +128,10 @@ oracle:
   db-name: ""
   username: ""
   password: ""
-  prefix: ""
-  singular: false
-  engine: ""
   max-idle-conns: 10
   max-open-conns: 100
   log-mode: ""
   log-zap: false
-  init-tls: false
-pgsql:
-  path: ""
-  port: ""
-  config: ""
-  db-name: ""
-  username: ""
-  password: ""
-  prefix: ""
-  singular: false
-  engine: ""
-  max-idle-conns: 10
-  max-open-conns: 100
-  log-mode: ""
-  log-zap: false
-  init-tls: false
 qiniu:
   zone: ZoneHuaDong
   bucket: ""
@@ -161,10 +140,13 @@ qiniu:
   access-key: ""
   secret-key: ""
   use-cdn-domains: false
+
+# redis configuration
 redis:
   db: 0
   addr: 127.0.0.1:6379
   password: ""
+
 system:
   env: public
   addr: 8888
@@ -175,6 +157,8 @@ system:
   iplimit-count: 15000
   iplimit-time: 3600
   router-prefix: ""
+
+# tencent cos configuration
 tencent-cos:
   bucket: xxxxx-10005608
   region: ap-shanghai
@@ -182,10 +166,11 @@ tencent-cos:
   secret-key: your-secret-key
   base-url: https://gin.vue.admin
   path-prefix: github.com/flipped-aurora/gin-vue-admin/server
-timer:
+
+# timer task db clear table
+Timer:
   start: true
-  spec: '@daily'
-  with_seconds: false
+  spec: "@daily" # 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron/v3
   detail:
   - tableName: sys_operation_records
     compareField: created_at
@@ -193,13 +178,13 @@ timer:
   - tableName: jwt_blacklists
     compareField: created_at
     interval: 168h
+
 zap:
   level: info
-  prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'
   format: console
+  prefix: "[github.com/flipped-aurora/gin-vue-admin/server]"
   director: log
+  show-line: true
   encode-level: LowercaseColorLevelEncoder
   stacktrace-key: stacktrace
-  max-age: 0
-  show-line: true
   log-in-console: true

@@ -49,6 +49,9 @@
           <el-form-item label="dbName">
             <el-input v-model="form.dbName" placeholder="请输入数据库名称" />
           </el-form-item>
+          <el-form-item label="dbName">
+            <el-checkbox v-model="form.useTls" placeholder="是否开启TLS"/>
+          </el-form-item>
           <el-form-item>
             <div style="text-align: right">
               <el-button type="primary" @click="onSubmit">立即初始化</el-button>

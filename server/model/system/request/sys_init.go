@@ -13,17 +13,21 @@ type InitDB struct {
 	UserName string `json:"userName" binding:"required"` // 数据库用户名
 	Password string `json:"password"`                    // 数据库密码
 	DBName   string `json:"dbName" binding:"required"`   // 数据库名
+	UseTls	bool `json:"useTls"` //是否开启TLS
 }
 
 // MysqlEmptyDsn msyql 空数据库 建库链接
 // Author SliverHorn
 func (i *InitDB) MysqlEmptyDsn() string {
-	initTls := "?tls=true"
 	if i.Host == "" {
 		i.Host = "127.0.0.1"
 	}
 	if i.Port == "" {
 		i.Port = "3306"
+	}
+	initTls := ""
+	if i.UseTls{
+		initTls := "?tls=true"
 	}
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/"+initTls, i.UserName, i.Password, i.Host, i.Port)
 }
@@ -37,13 +41,20 @@ func (i *InitDB) PgsqlEmptyDsn() string {
 	if i.Port == "" {
 		i.Port = "5432"
 	}
-	return "host=" + i.Host + " user=" + i.UserName + " password=" + i.Password + " port=" + i.Port + " dbname=" + "postgres" + " " + "sslmode=disable TimeZone=Asia/Shanghai"
+	initTls := "sslmode=disable"
+	if i.UseTls{
+		initTls := "sslmode=enable"
+	}
+	return "host=" + i.Host + " user=" + i.UserName + " password=" + i.Password + " port=" + i.Port + " dbname=" + "postgres" + " " + initTls + " TimeZone=Asia/Shanghai"
 }
 
 // ToMysqlConfig 转换 config.Mysql
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (i *InitDB) ToMysqlConfig() config.Mysql {
-	initTls := "&tls=true"
+	initTls := ""
+	if i.UseTls{
+		initTls := "?tls=true"
+	}
 	return config.Mysql{
 		GeneralDB: config.GeneralDB{
 			Path:         i.Host,
@@ -62,6 +73,10 @@ func (i *InitDB) ToMysqlConfig() config.Mysql {
 // ToPgsqlConfig 转换 config.Pgsql
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (i *InitDB) ToPgsqlConfig() config.Pgsql {
+	initTls := "sslmode=disable"
+	if i.UseTls{
+		initTls := "sslmode=enable"
+	}
 	return config.Pgsql{
 		GeneralDB: config.GeneralDB{
 			Path:         i.Host,
@@ -72,7 +87,7 @@ func (i *InitDB) ToPgsqlConfig() config.Pgsql {
 			MaxIdleConns: 10,
 			MaxOpenConns: 100,
 			LogMode:      "error",
-			Config:       "sslmode=disable TimeZone=Asia/Shanghai",
+			Config:       initTls + " TimeZone=Asia/Shanghai",
 		},
 	}
 }

@@ -194,6 +194,8 @@
       {{- end }}
       {{- if eq .FieldType "picture" }}
             <SelectImage v-model="formData.{{ .FieldJson }}" />
+      {{- else if eq .FieldType "pictures" }}
+            <SelectImage v-model="formData.{{ .FieldJson }}" />
       {{- end }}
       {{- if eq .FieldType "file" }}
             <SelectFile v-model="formData.{{ .FieldJson }}" />

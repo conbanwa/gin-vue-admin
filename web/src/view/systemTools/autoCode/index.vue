@@ -344,7 +344,6 @@ const typeOptions = ref([
   {
     label: '多图片（开发中）',
     value: 'pictures',
-    disabled: true
   }
 ])
 

@@ -72,6 +72,9 @@
       <el-form ref="autoCodeForm" :rules="rules" :model="form" label-width="120px" :inline="true">
         <el-form-item label="Struct名称" prop="structName">
           <el-input v-model="form.structName" placeholder="首字母自动转换大写" />
+          <el-button style="width:18%;margin-left:2%" @click="autoFill">
+            <span style="font-size: 12px">自动填充</span>
+        </el-button>
         </el-form-item>
         <el-form-item label="TableName" prop="tableName">
           <el-input v-model="form.tableName" placeholder="指定表名（非必填）" />
@@ -701,6 +704,13 @@ const init = () => {
   }
 }
 init()
+
+const autoFill = () => {
+  form.value.abbreviation = toLowerCase(form.value.structName)+'Router'
+  form.value.description = toLowerCase(form.value.structName)
+  form.value.packageName = toSQLLine(form.value.structName)
+  form.value.package = 0
+}
 
 watch(() => route.params.id, () => {
   if (route.name === 'autoCodeEdit') {
